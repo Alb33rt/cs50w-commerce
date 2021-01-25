@@ -1,7 +1,30 @@
 {% extends "auctions/layout.html" %}
 
 {% block body %}
-    <h2>Active Listings</h2>
+<div class="container">
+    <div class="col">
+        {% if listings %}
+            <h2>Active Listings</h2>
+            
+            <!-- For every single listing, make a new card that depicts the details of it-->
+            {% for listing in listings %}
+                <div class="card">
+                    <div class="card-header">
+                        {{ listing.title }}
+                    </div>
+                    <div class="card-body">
+                        <p class="card-text">${{ listing.price }} USD</p>
+                        <a href="#" class="btn btn-primary">Item Details</a>
+                        <a href="#" class="btn btn-primary">Add to Watchlist</a>
+                        <a href="#" class="btn btn-primary">Get the item</a>
+                    </div>
+                </div>
+            {% endfor %}
 
-    TODO
+        {% else %}
+        <h4>There are no current listings.</h4>
+        {% endif %}
+
+    </div>
+</div>
 {% endblock %}

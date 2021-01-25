@@ -4,11 +4,18 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User
+from .models import User, Auction
 
 
 def index(request):
-    return render(request, "auctions/index.html")
+    if not request.user.is_authenticated:
+        return HttpResponseRedirect(reverse("login"))
+
+    else:
+        auctions = Auction.objects.exclude(active=False).all()
+        return render(request, "auctions/index.html", {
+            "listings": auctions
+        })
 
 
 def login_view(request):
