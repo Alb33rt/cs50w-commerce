@@ -3,17 +3,22 @@
 {% block body %}
 <div class="container">
     <div class="col">
+        {% if user.is_authenticated %}
+        <a href="{% url 'create' %}" class="btn btn-outline-primary">Create a Listing</a>
+        {% endif %}
         {% if listings %}
-            <h2>Active Listings</h2>
-            
+
+            <h2 class="mt-4">Active Listings</h2>
+
             <!-- For every single listing, make a new card that depicts the details of it-->
             {% for listing in listings %}
-                <div class="card">
+                <div class="card mt-2">
                     <div class="card-header">
                         {{ listing.title }}
                     </div>
                     <div class="card-body">
-                        <p class="card-text">${{ listing.price }} USD</p>
+                        <p class="card-text"><b>${{ listing.price }} USD</b></p>
+                        <p class="card-text">{{ listing.description }}</p>
                         <a href="#" class="btn btn-primary">Item Details</a>
                         <a href="#" class="btn btn-primary">Add to Watchlist</a>
                         <a href="#" class="btn btn-primary">Get the item</a>

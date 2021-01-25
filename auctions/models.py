@@ -15,5 +15,5 @@ class Auction(models.Model):
     active = models.BooleanField(null=False)
 
     def __str__(self):
-        message = f"{self.title} is being listed by {self.lister} at ${self.price}"
+        message = f"{self.title}, ${self.price}, Listed by {self.lister}"
         return message

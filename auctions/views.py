@@ -17,6 +17,25 @@ def index(request):
             "listings": auctions
         })
 
+def create(request):
+    if request.method == "POST":
+        # Define the basic information that is entered
+        title = request.POST["title"]
+        price = request.POST["price"]
+        description = request.POST["description"]
+
+        # Grabs the user information
+        current_user = request.user
+
+        # Saves the information of the auction into models object
+        f = Auction(title=title, price=price, description=description, lister=current_user, active=True)
+        f.save()
+        
+        return HttpResponseRedirect(reverse("index"))
+
+    else:
+        return render(request, "auctions/create.html")
+
 
 def login_view(request):
     if request.method == "POST":
