@@ -1,4 +1,5 @@
 from django.contrib.auth import authenticate, login, logout
+from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
@@ -17,6 +18,7 @@ def index(request):
             "listings": auctions
         })
 
+@login_required(redirect_field_name='/login')
 def create(request):
     if request.method == "POST":
         # Define the basic information that is entered
@@ -24,11 +26,27 @@ def create(request):
         price = request.POST["price"]
         description = request.POST["description"]
 
+        image = request.POST.get('image', False)
+
         # Grabs the user information
         current_user = request.user
 
+        message = False
+
+        if title.strip() == '':
+            message = "Please enter an appropriate title."
+            return render(request, "auctions/create.html", {
+                    "alert": message,
+                })
+
+        elif price.strip() == '':
+            message = "Please enter a price that is appropriate."
+            return render(request, "auctions/create.html", {
+                    "alert": message,
+                }) 
+
         # Saves the information of the auction into models object
-        f = Auction(title=title, price=price, description=description, lister=current_user, active=True)
+        f = Auction(title=title, price=int(price), description=description, lister=current_user, active=True, image=image)
         f.save()
         
         return HttpResponseRedirect(reverse("index"))
@@ -56,7 +74,7 @@ def login_view(request):
     else:
         return render(request, "auctions/login.html")
 
-
+@login_required
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))

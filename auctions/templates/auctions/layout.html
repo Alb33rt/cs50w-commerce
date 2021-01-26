@@ -25,14 +25,16 @@
                     <a class="nav-link" href="#">Watchlist</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'logout' %}">Log Out</a>
+                    <a class="nav-link btn btn-outline-danger ml-1" href="{% url 'logout' %}">Log Out</a>
                 </li>
             {% else %}
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Log In</a>
+                    <a class="nav-link btn btn-outline-primary" href="{% url 'login' %}">
+                        Log In
+                    </a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'register' %}">Register</a>
+                    <a class="nav-link btn btn-outline-dark ml-3" href="{% url 'register' %}">Register</a>
                 </li>
             {% endif %}
         </ul>
