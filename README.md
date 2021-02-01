@@ -19,7 +19,7 @@ You can start the application by running ``python manage.py runserver`` after na
 The local server host ip address should be ``127.0.0.1:8000``, the link to the admin page should be ``/admin``.
 
 
-### Making Migrations
+## Making Migrations
 
 To make migrations for the web application, run
 ``python manage.py makemigrations auctions``
