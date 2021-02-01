@@ -33,16 +33,21 @@ def create(request):
 
         message = False
 
+        # Alert information for when the inserted information is in appropriate
         if title.strip() == '':
             message = "Please enter an appropriate title."
             return render(request, "auctions/create.html", {
                     "alert": message,
+                    "Auction": Auction(),
+                    "category": Auction().get_choices()
                 })
 
         elif price.strip() == '':
             message = "Please enter a price that is appropriate."
             return render(request, "auctions/create.html", {
                     "alert": message,
+                    "Auction": Auction(),
+                    "category": Auction().get_choices()
                 }) 
 
         # Saves the information of the auction into models object
@@ -52,7 +57,20 @@ def create(request):
         return HttpResponseRedirect(reverse("index"))
 
     else:
-        return render(request, "auctions/create.html")
+        return render(request, "auctions/create.html", {
+                "Auction": Auction(),
+                "category": Auction().get_choices()
+            })
+
+
+def item(request, name):
+    if request.method == "POST":
+        pass
+
+    auction = Auction.objects.get(title=name)
+    return render(request, 'auctions/item.html', {
+        "auction": auction,
+    })
 
 
 def login_view(request):
@@ -73,6 +91,7 @@ def login_view(request):
             })
     else:
         return render(request, "auctions/login.html")
+
 
 @login_required
 def logout_view(request):

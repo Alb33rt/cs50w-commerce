@@ -1,0 +1,22 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+<div class="container">
+    <div class='col'>
+        <h2>{{ auction.title }}</h2>
+        <p>{{ auction.category_string }}</p>
+        <img src="{{ auction.image.url }}">
+        <hr/>
+
+        <h4>Starting at ${{ auction.price }} USD </h4>
+
+        <p class="desc">{{ auction.description }}</p>
+
+    </div>
+
+    <div class="col">
+        <a href="#" class="btn btn-primary">Bid on this item</a>
+        <a href="{% url 'index' %}" class="btn btn-dark">Close</a>
+    </div>
+</div>
+{% endblock %}
