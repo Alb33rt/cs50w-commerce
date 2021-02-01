@@ -42,6 +42,7 @@ class Auction(models.Model):
 
     def category_string(self):
         categorization = self.category
+
         return f"Category: {categorization}"
 
 class Comment(models.Model): 

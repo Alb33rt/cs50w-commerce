@@ -5,7 +5,9 @@
     <div class='col'>
         <h2>{{ auction.title }}</h2>
         <p>{{ auction.category_string }}</p>
+        {% if auction.image %}
         <img src="{{ auction.image.url }}">
+        {% endif %}
         <hr/>
 
         <h4>Starting at ${{ auction.price }} USD </h4>
@@ -17,6 +19,27 @@
     <div class="col">
         <a href="#" class="btn btn-primary">Bid on this item</a>
         <a href="{% url 'index' %}" class="btn btn-dark">Close</a>
+    </div>
+</div>
+<p></p>
+
+<div class="container cont-space">
+    <h2>Comments</h2>
+    {% if comments %}
+        {% for comment in comments %}
+        {% endfor %}
+    {% else %}
+        <p>There are no comments on this listing.</p>
+    {% endif %}
+    <div class="cont-space">
+        <div class="container cont-space">
+            <div class="col">
+                <h4>Make a Comment</h4>
+                <form action="{% url 'item' name=auction.title %}" method="POST">
+                    {{ form.as_table }}
+                </form>
+            </div>
+    </div>
     </div>
 </div>
 {% endblock %}

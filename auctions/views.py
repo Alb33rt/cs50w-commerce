@@ -5,8 +5,8 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Auction
-
+from .models import User, Auction, Comment
+from .forms import CommentForm
 
 def index(request):
     if not request.user.is_authenticated:
@@ -68,8 +68,18 @@ def item(request, name):
         pass
 
     auction = Auction.objects.get(title=name)
+    auction_id = auction.id
+
+    if Comment.objects.filter(post=auction_id).all():
+        comments = Comment.objects.filter(post=auction_id).all()
+
+    else: 
+        comments = False 
+        
     return render(request, 'auctions/item.html', {
         "auction": auction,
+        "form": CommentForm(),
+        "comments": comments,
     })
 
 
