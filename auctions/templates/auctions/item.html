@@ -1,12 +1,19 @@
 {% extends 'auctions/layout.html' %}
 
 {% block body %}
+
+<!-- Details about the item -->
 <div class="container">
     <div class='col'>
         <h2>{{ auction.title }}</h2>
         <p>{{ auction.category_string }}</p>
+        {% if message %}
+            <div class="alert alert-danger" role="alert">
+                {{ message }}
+            </div>
+        {% endif %}
         {% if auction.image %}
-        <img src="{{ auction.image.url }}">
+        <img src="{{ auction.image.url }}" width=100%>
         {% endif %}
         <hr/>
 
@@ -16,13 +23,65 @@
 
     </div>
 
+    <div class="col mt-6 mb-4">
+        {% if bid %}
+        <div class="card bg-info">
+            <div class="card-header">
+                <h2>Current Highest Bid</h2>
+            </div>
+            <div class="card-body">
+                <div class="card-title">
+                    Made by {{ bid.bidder }}
+                </div>
+                <div class="card-text">
+                    At ${{ bid.bid_price }} USD
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="card bg-success">
+            <div class="card-body">
+                There are no current bids on this item.
+            </div>
+        </div>
+        {% endif %}
+    </div>
     <div class="col">
-        <a href="#" class="btn btn-primary">Bid on this item</a>
+
+        <!-- Bidding Section-->
+        <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bidModal">Bid on this item</button>
+
+        <!-- Bid Modal -->
+        <div class="modal fade" id="bidModal" role="dialog" aria-labelledby="bidModalLabel" aria-hidden="true" tabindex="-1">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="bidModalLabel">Bid On This Item</h5>
+                        <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form action="{% url 'placebid' auctionid=auction.id %}" method="POST">
+                            {% csrf_token %}
+                            {{ bidForm }}
+                            <input type="submit" class="form-control bg-success" value="Place Bid">
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Close the Page -->
         <a href="{% url 'index' %}" class="btn btn-dark">Close</a>
     </div>
 </div>
 <p></p>
 
+<!-- Comment Section -->
 <div class="container cont-space">
     <h2>Comments</h2>
     {% if comments %}
@@ -30,11 +89,13 @@
             <div class="card">
                 <div class="card-body">
                     <div class="card-title">
-                        <b>{{ comment.poster }}</b>
+                        <p class="font-weight-bold">{{ comment.poster }}</p>
                     </div>
                     <div class="card-text">
-                        {{ comment.comment }}
+                        <p class="text">{{ comment.comment }}</p>
+                        <small class="font-weight-light">Posted on {{ comment.time }}</small>
                     </div>
+                    
                 </div>
             </div>
         {% endfor %}
@@ -45,7 +106,7 @@
         <div class="container cont-space">
             <div class="col">
                 <h4>Make a Comment</h4>
-                <form action="{% url 'item' name=auction.title %}" method="POST">
+                <form action="{% url 'addcomment' auctionid=auction.id %}" method="POST">
                     {% csrf_token %}
                     {{ form }}
                     <input type="submit" class="btn btn-success mt-2" value="Post">

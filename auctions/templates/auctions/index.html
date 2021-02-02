@@ -4,7 +4,7 @@
 <div class="container">
     <div class="col">
         {% if user.is_authenticated %}
-        <a href="{% url 'create' %}" class="btn btn-outline-primary">Create a Listing</a>
+        <a href="{% url 'createlisting' %}" class="btn btn-outline-primary">Create a Listing</a>
         {% endif %}
         {% if listings %}
 
@@ -38,7 +38,7 @@
                                 <p class="card-text">{{ listing.description }}</p>
 
                                 <!-- Button functions -->
-                                <a href="{% url 'item' name=listing.title %}" class="btn btn-primary mr-1">Item Details</button>
+                                <a href="{% url 'item' auctionid=listing.id %}" class="btn btn-primary mr-1">Item Details</button>
                                 <a href="#" class="btn btn-primary">Add to Watchlist</a>
                             </div>
                         </div>

@@ -11,7 +11,7 @@
             {{ alert }}
         </div>
     {% endif %}
-    <form action="{% url 'create' %}" method="POST" class ="mt-2">
+    <form action="{% url 'createlisting' %}" method="POST" class ="mt-2">
         {% csrf_token %}
         <div class="form-group">
             <label for="title">Title</label>

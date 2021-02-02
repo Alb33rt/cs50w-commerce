@@ -5,13 +5,16 @@ from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Auction, Comment
-from .forms import CommentForm
+from .models import User, Auction, Comment, Bid
+from .forms import CommentForm, BidForm
+
+from .functions import get_highest_bid
+
+import decimal
 
 def index(request):
     if not request.user.is_authenticated:
-        return HttpResponseRedirect(reverse("login"))
-
+        return HttpResponseRedirect(reverse("welcome"))
     else:
         auctions = Auction.objects.exclude(active=False).all()
         return render(request, "auctions/index.html", {
@@ -19,7 +22,7 @@ def index(request):
         })
 
 @login_required(redirect_field_name='/login')
-def create(request):
+def createlisting(request):
     if request.method == "POST":
         # Define the basic information that is entered
         title = request.POST["title"]
@@ -50,6 +53,7 @@ def create(request):
                     "category": Auction().get_choices()
                 }) 
 
+        title = title.strip()
         # Saves the information of the auction into models object
         f = Auction(title=title, price=int(price), description=description, lister=current_user, active=True, image=image)
         f.save()
@@ -62,43 +66,24 @@ def create(request):
                 "category": Auction().get_choices()
             })
 
+@login_required(redirect_field_name='/login')
+def itemdetails(request, auctionid):
 
-def item(request, name):
+    # Setting up all variables needed regardless of GET or POST
+    auction = Auction.objects.filter(id=auctionid).get()
 
-    # Getting auction id and comment filters
-    auction = Auction.objects.get(title=name)
-    auction_id = auction.id
+    # Getting the current highest Bid 
+    if Bid.objects.filter(post=auctionid):
+        all_bids = Bid.objects.filter(post=auctionid).all()
+                
+        current_price = get_highest_bid(all_bids)
+        current_bid = Bid.objects.filter(bid_price=current_price).get()
+    else: 
+        current_price = Auction.price
+        current_bid = False
 
-    # Comment Function
-    if request.method == "POST":
-        form = CommentForm(request.POST)
-        if form.is_valid():
-            comment = form.cleaned_data['comment']
-            current_user = request.user
-
-            new_comment = Comment(comment=comment, poster=current_user)
-            new_comment.save()
-
-            # Associating the comment with current post
-            new_comment.post.add(auction_id)
-
-
-            # Getting the bunch of comments
-            comments = Comment.objects.filter(post=auction_id).all()
-
-            """Reminder here that it is impossible for comments to be false because the user has just posted a brand new one."""
-
-            return render(request, 'auctions/item.html', {
-                "auction": auction,
-                "form": CommentForm(),
-                "comments": comments,
-            })
-
-        else:
-            pass
-
-    if Comment.objects.filter(post=auction_id).all():
-        comments = Comment.objects.filter(post=auction_id).all()
+    if Comment.objects.filter(post=auctionid):
+        comments = Comment.objects.filter(post=auctionid).all()
     else: 
         comments = False 
         
@@ -106,8 +91,72 @@ def item(request, name):
         "auction": auction,
         "form": CommentForm(),
         "comments": comments,
+        "bid": current_bid,
+        "bidForm": BidForm(),
     })
 
+@login_required(redirect_field_name='/login')
+def addcomment(request, auctionid):
+    commentform = CommentForm(request.POST)
+    if commentform.is_valid():
+        comment = commentform.cleaned_data['comment']
+        current_user = request.user
+
+        comment = comment.strip()
+        new_comment = Comment(comment=comment, poster=current_user)
+        new_comment.save()
+
+        # Associating the comment with current post
+        new_comment.post.add(auctionid)
+
+        """Reminder here that it is impossible for comments to be false because the user has just posted a brand new one."""
+
+        return HttpResponseRedirect(reverse('item', args=[auctionid]))
+
+@login_required(redirect_field_name='/login')
+def placebid(request, auctionid):
+
+    # Sets up variables for use
+    auction = Auction.objects.filter(id=auctionid).get()
+    if Bid.objects.filter(post=auctionid):
+        all_bids = Bid.objects.filter(post=auctionid).all()
+                
+        current_price = get_highest_bid(all_bids)
+        current_bid = Bid.objects.filter(bid_price=current_price).get()
+    else: 
+        current_price = auction.price
+        current_bid = False
+
+    # get the potential forms submitted
+    bid_form = BidForm(request.POST)
+
+    # When the bid form is being submitted
+    if bid_form.is_valid():
+        bidder = request.user
+        bid_price = bid_form.cleaned_data['bid_price']
+
+        if bid_price > decimal.Decimal(current_price):
+            bid = Bid(bidder=bidder, bid_price=bid_price, post=auction)
+            bid.save()
+
+            return HttpResponseRedirect(reverse('item', args=[auctionid]))
+
+        else:
+            message= "Please bid higher than the current highest bid, please re-enter your bid."
+            if Comment.objects.filter(post=auctionid):
+                comments = Comment.objects.filter(post=auctionid).all()
+            else: 
+                comments = False 
+
+            return render(request, 'auctions/item.html', {
+                "message": message,
+                "auction": auction,
+                "form": CommentForm(),
+                "comments": comments,
+                "bid": current_bid,
+                "bidForm": BidForm(),
+            })
+    
 
 def login_view(request):
     if request.method == "POST":
@@ -129,7 +178,7 @@ def login_view(request):
         return render(request, "auctions/login.html")
 
 
-@login_required
+@login_required(redirect_field_name='/login')
 def logout_view(request):
     logout(request)
     return HttpResponseRedirect(reverse("index"))
@@ -160,3 +209,6 @@ def register(request):
         return HttpResponseRedirect(reverse("index"))
     else:
         return render(request, "auctions/register.html")
+
+def welcome(request):
+    return render(request, "auctions/welcome.html")

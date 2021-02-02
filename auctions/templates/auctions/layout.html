@@ -8,7 +8,7 @@
         <link href="{% static 'auctions/styles.css' %}" rel="stylesheet">
     </head>
     <body>
-        <h1>Auctions</h1>
+        <h1>Albert's Auctions</h1>
         <div>
             <!-- Tries to find out if the user is logged in or not-->
             {% if user.is_authenticated %}
@@ -46,5 +46,7 @@
         <hr>
         {% block body %}
         {% endblock %}
+        <!-- JavaScript Bundle with Popper -->
+        <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.0-beta1/dist/js/bootstrap.bundle.min.js" integrity="sha384-ygbV9kiqUc6oa4msXn9868pTtWMgiQaeYH7/t7LECLbyPA2x65Kgf80OJFdroafW" crossorigin="anonymous"></script>
     </body>
 </html>
