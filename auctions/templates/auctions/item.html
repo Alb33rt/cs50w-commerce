@@ -27,6 +27,16 @@
     <h2>Comments</h2>
     {% if comments %}
         {% for comment in comments %}
+            <div class="card">
+                <div class="card-body">
+                    <div class="card-title">
+                        <b>{{ comment.poster }}</b>
+                    </div>
+                    <div class="card-text">
+                        {{ comment.comment }}
+                    </div>
+                </div>
+            </div>
         {% endfor %}
     {% else %}
         <p>There are no comments on this listing.</p>
@@ -36,7 +46,9 @@
             <div class="col">
                 <h4>Make a Comment</h4>
                 <form action="{% url 'item' name=auction.title %}" method="POST">
-                    {{ form.as_table }}
+                    {% csrf_token %}
+                    {{ form }}
+                    <input type="submit" class="btn btn-success mt-2" value="Post">
                 </form>
             </div>
     </div>

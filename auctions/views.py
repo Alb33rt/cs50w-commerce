@@ -64,15 +64,41 @@ def create(request):
 
 
 def item(request, name):
-    if request.method == "POST":
-        pass
 
+    # Getting auction id and comment filters
     auction = Auction.objects.get(title=name)
     auction_id = auction.id
 
+    # Comment Function
+    if request.method == "POST":
+        form = CommentForm(request.POST)
+        if form.is_valid():
+            comment = form.cleaned_data['comment']
+            current_user = request.user
+
+            new_comment = Comment(comment=comment, poster=current_user)
+            new_comment.save()
+
+            # Associating the comment with current post
+            new_comment.post.add(auction_id)
+
+
+            # Getting the bunch of comments
+            comments = Comment.objects.filter(post=auction_id).all()
+
+            """Reminder here that it is impossible for comments to be false because the user has just posted a brand new one."""
+
+            return render(request, 'auctions/item.html', {
+                "auction": auction,
+                "form": CommentForm(),
+                "comments": comments,
+            })
+
+        else:
+            pass
+
     if Comment.objects.filter(post=auction_id).all():
         comments = Comment.objects.filter(post=auction_id).all()
-
     else: 
         comments = False 
         
