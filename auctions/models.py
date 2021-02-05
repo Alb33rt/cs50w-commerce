@@ -12,7 +12,7 @@ class Auction(models.Model):
     title = models.CharField(max_length=32, null=False)
     description = models.TextField(max_length=512, blank=True, null=True)
     price = models.DecimalField(null = False, default= 1, max_digits=10, decimal_places=2)
-    lister = models.ForeignKey(User, on_delete=models.CASCADE, related_name="lister") 
+    lister = models.ForeignKey(User, on_delete=models.CASCADE, related_name="auction") 
 
     # Defines the choices of category the object can be become
     LIFE = "LF"
@@ -34,7 +34,7 @@ class Auction(models.Model):
     listed_time = models.DateTimeField(auto_now_add=True)
 
     def     __str__(self):
-        message = f"{self.title}, ${self.price}, Listed by {self.lister}"
+        message = f"#{self.id} | {self.title} | ${self.price}"
         return message
 
     def get_choices(self):
@@ -71,3 +71,10 @@ class Bid(models.Model):
     def __str__(self):
         message = f"Bid by {self.bidder} with {self.bid_price} on the line"
         return message
+
+class Watchlist(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="watchlist")
+    item = models.ManyToManyField(Auction, related_name="watched")
+
+    def __str__(self):
+        return f"{self.user}'s Watchlist"

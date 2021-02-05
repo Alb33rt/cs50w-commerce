@@ -1,11 +1,12 @@
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
 from django.db import IntegrityError
+from django.db.models import Count
 from django.http import HttpResponse, HttpResponseRedirect
 from django.shortcuts import render
 from django.urls import reverse
 
-from .models import User, Auction, Comment, Bid
+from .models import User, Auction, Comment, Bid, Watchlist
 from .forms import CommentForm, BidForm
 
 from .functions import get_highest_bid
@@ -16,9 +17,13 @@ def index(request):
     if not request.user.is_authenticated:
         return HttpResponseRedirect(reverse("welcome"))
     else:
+        user = request.user
+        user_watching = user.watchlist.get()
         auctions = Auction.objects.exclude(active=False).all()
+        watched_auctions = [val for val in auctions if val in user_watching.item.all()]
         return render(request, "auctions/index.html", {
-            "listings": auctions
+            "listings": auctions,
+            "watched_listings": watched_auctions,
         })
 
 @login_required(redirect_field_name='/login')
@@ -72,6 +77,12 @@ def itemdetails(request, auctionid):
     # Setting up all variables needed regardless of GET or POST
     auction = Auction.objects.filter(id=auctionid).get()
 
+    # checks if item is being watched by the user
+    user_watching = request.user.watchlist.get()
+    watched = False
+    if auction in user_watching.item.all():
+        watched = True
+
     # Getting the current highest Bid 
     if Bid.objects.filter(post=auctionid):
         all_bids = Bid.objects.filter(post=auctionid).all()
@@ -93,6 +104,7 @@ def itemdetails(request, auctionid):
         "comments": comments,
         "bid": current_bid,
         "bidForm": BidForm(),
+        "watched": watched,
     })
 
 @login_required(redirect_field_name='/login')
@@ -112,6 +124,41 @@ def addcomment(request, auctionid):
         """Reminder here that it is impossible for comments to be false because the user has just posted a brand new one."""
 
         return HttpResponseRedirect(reverse('item', args=[auctionid]))
+
+@login_required(redirect_field_name='/login')
+def addtowatchlist(request, auctionid):
+    auction = Auction.objects.filter(id=auctionid)
+    if Watchlist.objects.filter(user=request.user, item=auctionid):
+        message="You already have this item in your watchlist"
+        return HttpResponseRedirect(reverse('index'))
+
+    user = request.user
+    (users_list, created) = user.watchlist.get_or_create(user=user)
+    users_list.item.add(auctionid)
+  
+    return HttpResponseRedirect(reverse('index'))
+
+@login_required(redirect_field_name='/login')
+def removefromwatchlist(request, auctionid):
+    auction = Auction.objects.filter(id=auctionid)
+
+    user = request.user
+    users_list = user.watchlist.get(user=user)
+    users_list.item.remove(auctionid)
+
+    return HttpResponseRedirect(reverse('watchlist'))
+
+@login_required(redirect_field_name='/login')
+def watchlist(request):
+    user = request.user
+    users_list, created = user.watchlist.get_or_create()
+   
+    # Uses list basic search method
+    matches = [val for val in Auction.objects.all() if val in users_list.item.all()]
+
+    return render(request, 'auctions/watchlist.html', {
+        "listings": matches,
+    })
 
 @login_required(redirect_field_name='/login')
 def placebid(request, auctionid):
@@ -143,6 +190,13 @@ def placebid(request, auctionid):
 
         else:
             message= "Please bid higher than the current highest bid, please re-enter your bid."
+
+            # Gets if the item is being watched
+            user_watching = request.user.watchlist.get()
+            watched = False
+            if auction in user_watching.item.all():
+                watched = True
+
             if Comment.objects.filter(post=auctionid):
                 comments = Comment.objects.filter(post=auctionid).all()
             else: 
@@ -155,6 +209,7 @@ def placebid(request, auctionid):
                 "comments": comments,
                 "bid": current_bid,
                 "bidForm": BidForm(),
+                "watched": watched,
             })
     
 
@@ -201,6 +256,8 @@ def register(request):
         try:
             user = User.objects.create_user(username, email, password)
             user.save()
+            users_list = Watchlist(user=user)
+            users_list.save()
         except IntegrityError:
             return render(request, "auctions/register.html", {
                 "message": "Username already taken."

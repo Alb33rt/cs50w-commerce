@@ -1,20 +1,17 @@
-{% extends "auctions/layout.html" %}
+{% extends 'auctions/layout.html' %}
 
 {% block body %}
 <div class="container">
     <div class="col">
-        {% if user.is_authenticated %}
-        <a href="{% url 'createlisting' %}" class="btn btn-outline-primary">Create a Listing</a>
+        <h1 class="display">
+            My Watchlist
+        </h1>
+
+        {% if request.user.is_superuser %}
+        <div class="alert alert-primary mt-4">You are currently logged in as a superuser. Access the admins page at url/admin/.</div>
         {% endif %}
+
         {% if listings %}
-
-            <h2 class="mt-4">Active Listings</h2>
-
-            {% if request.user.is_superuser %}
-            <div class="alert alert-primary mt-4">You are currently logged in as a superuser. Access the admins page at url/admin/.</div>
-            {% endif %}
-
-            <!-- For every single listing, make a new card that depicts the details of it-->
             {% for listing in listings %}
                 <div class="card mt-2">
                     <div class="card-header">
@@ -39,22 +36,15 @@
 
                                 <!-- Button functions -->
                                 <a href="{% url 'item' auctionid=listing.id %}" class="btn btn-primary mr-1">Item Details</button>
-                                {% if listing in watched_listings %}
                                 <a href="{% url 'removewatchlist' listing.id %}" class="btn btn-danger">Remove from Watchlist</a>
-                                {% else %}
-                                <a href="{% url 'addwatchlist' listing.id %}" class="btn btn-primary">Add to Watchlist</a>
-                                {% endif %}
                             </div>
                         </div>
                     </div>
                 </div>
             {% endfor %}
-
         {% else %}
-        <h4>There are no current listings.</h4>
+        <div class="alert alert-info">You currently do not have any items in your watchlist, add them from going to <a href="{% url 'index' %}">Active Listings.</a></div>
         {% endif %}
-
     </div>
-
 </div>
 {% endblock %}

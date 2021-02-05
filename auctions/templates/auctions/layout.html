@@ -18,14 +18,14 @@
             {% endif %}
         </div>
         <ul class="nav">
-            <li class="nav-item">
-                <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
-            </li>
 
             <!-- Under the condition that the user is logged in -->
             {% if user.is_authenticated %}
                 <li class="nav-item">
-                    <a class="nav-link" href="#">Watchlist<span class="badge rounded-pill bg-secondary"></span></a>
+                    <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'watchlist' %}">My Watchlist<span class="badge rounded-pill bg-secondary"></span></a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link btn btn-outline-danger ml-1" href="{% url 'logout' %}">Log Out</a>
@@ -33,6 +33,9 @@
 
             <!-- Fresh New Page when the users are not logged in-->
             {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'login' %}">Active Listings</a>
+                </li>
                 <li class="nav-item">
                     <a class="nav-link btn btn-outline-primary" href="{% url 'login' %}">
                         Log In
