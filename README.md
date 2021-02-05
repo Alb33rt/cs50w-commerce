@@ -3,14 +3,14 @@ This is a commerce-based web application from the web course CS50W from Harvard.
 
 The application has several features, which will be outlined below the instructions for bootup.
 
+You should install the packages, then boot up the web application.
 
 
 #### Installing basic packages 
 Make sure that ``pip`` -- the Python package installer is up-to-date before you install anything.
 
-+ The commerce-application is run on Django, you can install Django by running ``pip install django==3.1.0`` inside the terminal.
-+ Image storage is run on Pillow version 8.1.0 , install using ``pip install Pillow==8.1.0``.
-
++ The commerce-application is run on *Django*, you can install Django by running ``pip install django==3.1.0`` inside the terminal
++ Image storage is run on *Pillow version 8.1.0* , install using ``pip install Pillow==8.1.0``
 
 
 ## Starting the application
