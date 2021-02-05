@@ -161,7 +161,7 @@ def watchlist(request):
     })
 
 @login_required(redirect_field_name='/login')
-def placebid(request, auctionid):
+def placebid(request, auctionid):   
 
     # Sets up variables for use
     auction = Auction.objects.filter(id=auctionid).get()
@@ -202,6 +202,7 @@ def placebid(request, auctionid):
             else: 
                 comments = False 
 
+
             return render(request, 'auctions/item.html', {
                 "message": message,
                 "auction": auction,
@@ -211,7 +212,17 @@ def placebid(request, auctionid):
                 "bidForm": BidForm(),
                 "watched": watched,
             })
+
+def closeauction(request, auctionid):
+    auction = Auction.objects.get(id=auctionid)
+    if auction.active == True:
+        auction.active = False
+        auction.save()
+        return HttpResponseRedirect(reverse('index'))
     
+    else:
+        return HttpResponseRedirect(reverse('item'))
+
 
 def login_view(request):
     if request.method == "POST":
@@ -255,7 +266,7 @@ def register(request):
         # Attempt to create new user
         try:
             user = User.objects.create_user(username, email, password)
-            user.save()
+            user.save() 
             users_list = Watchlist(user=user)
             users_list.save()
         except IntegrityError:

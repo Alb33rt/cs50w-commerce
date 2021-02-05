@@ -65,6 +65,7 @@ class Comment(models.Model):
 class Bid(models.Model):
     bidder = models.ForeignKey(User, on_delete=models.CASCADE, related_name="bidder")
     bid_price = models.DecimalField(decimal_places=2, max_digits=10)
+    time = models.DateTimeField(auto_now_add=True)
 
     post = models.ForeignKey(Auction, on_delete=models.CASCADE, related_name="auction")
 

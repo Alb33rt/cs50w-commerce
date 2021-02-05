@@ -14,9 +14,15 @@
         {% if listings %}
             {% for listing in listings %}
                 <div class="card mt-2">
+                    {% if listing.active %}
                     <div class="card-header">
                         {{ listing.title }}
                     </div>
+                    {% else %}
+                        <div class="card-header bg-danger">
+                            {{ listing.title }} (ENDED)
+                        </div>
+                    {% endif %}
                     <div class="card-body">
                         <div class="row">
                             <!-- Image of the object -->

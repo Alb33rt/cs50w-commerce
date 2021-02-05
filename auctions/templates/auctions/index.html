@@ -9,6 +9,7 @@
         {% if listings %}
 
             <h2 class="mt-4">Active Listings</h2>
+            <p class="text">Welcome to Auctions! Here, you can sell items, create bids and watch them, through a public platform. You can add items to your watchlist, or bid on them by accessing the item details.</p>
 
             {% if request.user.is_superuser %}
             <div class="alert alert-primary mt-4">You are currently logged in as a superuser. Access the admins page at url/admin/.</div>

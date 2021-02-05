@@ -30,6 +30,7 @@
 
     </div>
 
+    {% if auction.active %}
     <div class="col mt-6 mb-4">
         {% if bid %}
         <div class="card bg-info">
@@ -44,19 +45,52 @@
                     At ${{ bid.bid_price }} USD
                 </div>
             </div>
+            {% if request.user == auction.lister %}
+            <div class="card-footer">
+                <small class="text-muted">You are the creator of this listing. Do you want to close this auction?</small>
+                <a href="#" class="btn btn-danger">Close this Auction.</a>
+            </div>
+            {% endif %}
         </div>
         {% else %}
         <div class="card bg-success">
             <div class="card-body">
                 There are no current bids on this item.
             </div>
+            {% if request.user == auction.lister %}
+            <div class="card-footer bg-white">
+                <small class="text-muted">You are the creator of this listing. Do you want to close this auction?</small>
+                <a href="{% url 'closeauction' auction.id %}" class="btn btn-danger">Close this Auction.</a>
+            </div>
+            {% endif %}
         </div>
         {% endif %}
     </div>
+
+    {% else %}
+        
+        <div class="col mt-6 mb-4">
+            {% if bid.bid_price %}
+            <div class="card bg-info">
+                <div class="card-body">This item was sold at {{ bid.bid_price }} to {{ bid.bidder }}</div>
+            </div>
+            {% else %}
+            <div class="card bg-info">
+                <div class="card-body">This item was not sold.</div>
+            </div>
+            {% endif %}
+        </div>
+
+    {% endif %}
+
     <div class="col">
 
         <!-- Bidding Section-->
+        {% if auction.active == True %}
         <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#bidModal">Bid on this item</button>
+        {% else %}
+        <p>This Auction has ended. Please return to title screen</p>
+        {% endif %}
 
         <!-- Bid Modal -->
         <div class="modal fade" id="bidModal" role="dialog" aria-labelledby="bidModalLabel" aria-hidden="true" tabindex="-1">
@@ -83,7 +117,7 @@
         </div>
 
         <!-- Close the Page -->
-        <a href="{% url 'index' %}" class="btn btn-dark">Close</a>
+        <a href="{% url 'index' %}" class="btn btn-dark">Back to All Listings</a>
     </div>
 </div>
 <p></p>

@@ -8,7 +8,7 @@
         <link href="{% static 'auctions/styles.css' %}" rel="stylesheet">
     </head>
     <body>
-        <h1>Albert's Auctions</h1>
+        <h1>Auctions</h1>
         <div>
             <!-- Tries to find out if the user is logged in or not-->
             {% if user.is_authenticated %}
@@ -18,12 +18,11 @@
             {% endif %}
         </div>
         <ul class="nav">
-
+            <li class="nav-item">
+                <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
+            </li>
             <!-- Under the condition that the user is logged in -->
             {% if user.is_authenticated %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'index' %}">Active Listings</a>
-                </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'watchlist' %}">My Watchlist<span class="badge rounded-pill bg-secondary"></span></a>
                 </li>
@@ -33,9 +32,6 @@
 
             <!-- Fresh New Page when the users are not logged in-->
             {% else %}
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'login' %}">Active Listings</a>
-                </li>
                 <li class="nav-item">
                     <a class="nav-link btn btn-outline-primary" href="{% url 'login' %}">
                         Log In
