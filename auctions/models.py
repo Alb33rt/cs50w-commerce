@@ -2,7 +2,7 @@ from django.contrib.auth.models import AbstractUser
 from django.db import models
 
 import datetime
-
+from datetime import timedelta
 
 class User(AbstractUser):
     pass
@@ -13,6 +13,8 @@ class Auction(models.Model):
     description = models.TextField(max_length=512, blank=True, null=True)
     price = models.DecimalField(null = False, default= 1, max_digits=10, decimal_places=2)
     lister = models.ForeignKey(User, on_delete=models.CASCADE, related_name="auction") 
+    time_created = models.DateTimeField(auto_now_add=True)
+    duration = models.DurationField(default=timedelta(days=7))
 
     # Defines the choices of category the object can be become
     LIFE = "LF"
@@ -49,6 +51,10 @@ class Auction(models.Model):
         categorization = self.category
 
         return f"Category: {categorization}"    
+
+    def time_remaining(self):
+        # Be Aware that aware objects can only subtract other aware objects, therefore utc was defined
+        return self.time_created + self.duration - datetime.datetime.now(datetime.timezone.utc)
 
 class Comment(models.Model): 
     comment = models.TextField(max_length=1024, blank=False)

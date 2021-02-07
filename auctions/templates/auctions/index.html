@@ -36,7 +36,9 @@
                             <!-- Details of listing -->
                             <div class="col-8">
                                 <p class="card-text">Starts at ${{ listing.price }} USD</p>
-                                <p class="card-text">{{ listing.description }}</p>
+
+                                <small class="card-text text-muted"><b>Remaining Time</b>:  {{ listing.time_remaining }}</small>
+                                <p class="card-text mt-5">{{ listing.description }}</p>
 
                                 <!-- Button functions -->
                                 <a href="{% url 'item' auctionid=listing.id %}" class="btn btn-primary mr-1">Item Details</button>
@@ -45,6 +47,7 @@
                                 {% else %}
                                 <a href="{% url 'addwatchlist' listing.id %}" class="btn btn-primary">Add to Watchlist</a>
                                 {% endif %}
+                                <small class="text-muted ml-3"><b>Time created:</b> {{ listing.time_created }}</small>
                             </div>
                         </div>
                     </div>

@@ -12,6 +12,7 @@ from .forms import CommentForm, BidForm
 from .functions import get_highest_bid
 
 import decimal
+from datetime import timedelta, timezone, datetime
 
 def index(request):
     if not request.user.is_authenticated:
@@ -104,6 +105,14 @@ def itemdetails(request, auctionid):
     # Setting up all variables needed regardless of GET or POST
     auction = Auction.objects.filter(id=auctionid).get()
 
+    get_time_remaining = lambda a : auction.time_created + auction.duration - a 
+    time_remaining = get_time_remaining(datetime.now(timezone.utc))
+    print(time_remaining)
+
+    if time_remaining < timedelta(days=0, seconds=0):
+        auction.active = False
+        auction.save()
+
     # checks if item is being watched by the user
     user_watching = request.user.watchlist.get()
     watched = False
@@ -192,6 +201,39 @@ def placebid(request, auctionid):
 
     # Sets up variables for use
     auction = Auction.objects.filter(id=auctionid).get()
+
+    get_time_remaining = lambda a : auction.time_created + auction.duration - a 
+    time_remaining = get_time_remaining(datetime.now(timezone.utc))
+
+    if timedelta(time_remaining) < timedelta(days=0, seconds=0):
+        auction.active = False
+        auction.save()
+        message= "This listing has elapsed. Please try earlier next time."
+
+        # Gets if the item is being watched
+        user_watching = request.user.watchlist.get()
+        watched = False
+        if auction in user_watching.item.all():
+            watched = True
+
+        if Comment.objects.filter(post=auctionid):
+            comments = Comment.objects.filter(post=auctionid).all()
+        else: 
+            comments = False 
+
+
+        return render(request, 'auctions/item.html', {
+                "message": message,
+                "auction": auction,
+                "form": CommentForm(),
+                "comments": comments,
+                "bid": current_bid,
+                "bidForm": BidForm(),
+                "watched": watched,
+        })
+
+        
+
     if Bid.objects.filter(post=auctionid):
         all_bids = Bid.objects.filter(post=auctionid).all()
                 

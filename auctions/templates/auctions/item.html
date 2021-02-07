@@ -7,6 +7,8 @@
     <div class='col'>
         <h2>{{ auction.title }}</h2>
 
+        <div class="alert alert-danger">Time Remaining: {{ auction.time_remaining }}</div>
+
         {% if watched %}
             <a href="{% url 'removewatchlist' auction.id %}" class="btn btn-danger mb-2">Remove from Watchlist</a>
         {% else %}
@@ -71,6 +73,7 @@
             {% endif %}
         </div>
         {% endif %}
+        <p class="text-muted mt-4">This listing was created on {{ auction.time_created }}</p>
     </div>
 
     {% else %}
