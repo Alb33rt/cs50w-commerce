@@ -1,0 +1,53 @@
+{% extends 'auctions/layout.html' %}
+
+{% block body %}
+<div class="container">
+        {% if listings %}
+
+            <h2 class="mt-4">Categories View</h2>
+            <P>You are currently viewing Category: {{ categoryname }}</P>
+            {% if request.user.is_superuser %}
+            <div class="alert alert-primary mt-4">You are currently logged in as a superuser. Access the admins page at url/admin/.</div>
+            {% endif %}
+
+            <!-- For every single listing, make a new card that depicts the details of it-->
+            {% for listing in listings %}
+                <div class="card mt-2">
+                    <div class="card-header">
+                        {{ listing.title }}
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <!-- Image of the object -->
+                            {% if listing.image %}
+                            <div class="col-4">
+                                <img src ="{{ listing.image.url }}" width=80%>
+                            </div>
+                            {% else %}
+                            <div class="col-4">
+                                <p class="card-text">There are no images available.</p>
+                            </div>
+                            {% endif %}
+                            <!-- Details of listing -->
+                            <div class="col-8">
+                                <p class="card-text">Starts at ${{ listing.price }} USD</p>
+                                <p class="card-text">{{ listing.description }}</p>
+
+                                <!-- Button functions -->
+                                <a href="{% url 'item' auctionid=listing.id %}" class="btn btn-primary mr-1">Item Details</button>
+                                {% if listing in watched_listings %}
+                                <a href="{% url 'removewatchlist' listing.id %}" class="btn btn-danger">Remove from Watchlist</a>
+                                {% else %}
+                                <a href="{% url 'addwatchlist' listing.id %}" class="btn btn-primary">Add to Watchlist</a>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+
+        {% else %}
+        <h4>There are no current listings.</h4>
+        {% endif %}
+    </div>
+{% endblock %}

@@ -26,6 +26,33 @@ def index(request):
             "watched_listings": watched_auctions,
         })
 
+@login_required(redirect_field_name="/login")
+def categorymenu(request):
+    categories = [i[1] for i in Auction.CATEGORIES]
+    return render(request, 'auctions/categorymenu.html', {
+        "categories": categories,
+    })
+
+@login_required(redirect_field_name="/login")
+def categorylist(request, category):
+    categories = [i for i in Auction.CATEGORIES if i[1] == category]
+    category_id = categories[0][0]
+    category_name = categories[0][1]
+    print(category_name)
+
+
+    user = request.user
+    user_watching = user.watchlist.get()
+
+    auctions = Auction.objects.filter(category=category_id, active=True)
+    watched_auctions = [val for val in auctions if val in user_watching.item.all()]
+
+    return render(request, "auctions/categorylist.html", {
+        "categoryname": category_name,
+        "listings": auctions,
+        "watched_listings": watched_auctions,
+    })
+
 @login_required(redirect_field_name='/login')
 def createlisting(request):
     if request.method == "POST":
