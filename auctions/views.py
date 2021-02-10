@@ -7,7 +7,7 @@ from django.shortcuts import render
 from django.urls import reverse
 
 from .models import User, Auction, Comment, Bid, Watchlist
-from .forms import CommentForm, BidForm
+from .forms import CommentForm, BidForm, CreateForm
 
 from .functions import get_highest_bid
 
@@ -57,46 +57,39 @@ def categorylist(request, category):
 @login_required(redirect_field_name='/login')
 def createlisting(request):
     if request.method == "POST":
-        # Define the basic information that is entered
-        title = request.POST["title"]
-        price = request.POST["price"]
-        description = request.POST["description"]
+        form = CreateForm(request.POST, request.FILES)
+        if form.is_valid():
+            # Define the basic information that is entered
+            title = form.cleaned_data.get('title')
+            price = form.cleaned_data.get('price')
+            description = form.cleaned_data.get('description')
 
-        image = request.POST.get('image', False)
+            image = form.cleaned_data.get('image')
 
-        # Grabs the user information
-        current_user = request.user
+            # Grabs the user information
+            current_user = request.user
 
-        message = False
+            message = False
 
-        # Alert information for when the inserted information is in appropriate
-        if title.strip() == '':
-            message = "Please enter an appropriate title."
-            return render(request, "auctions/create.html", {
-                    "alert": message,
-                    "Auction": Auction(),
-                    "category": Auction().get_choices()
-                })
+            # Alert information for when the inserted information is in appropriate
+            if title.strip() == '':
+                message = "Please enter an appropriate title."
+                return render(request, "auctions/create.html", {
+                        "alert": message,
+                        "Auction": Auction(),
+                        "category": Auction().get_choices()
+                    })
 
-        elif price.strip() == '':
-            message = "Please enter a price that is appropriate."
-            return render(request, "auctions/create.html", {
-                    "alert": message,
-                    "Auction": Auction(),
-                    "category": Auction().get_choices()
-                }) 
-
-        title = title.strip()
-        # Saves the information of the auction into models object
-        f = Auction(title=title, price=int(price), description=description, lister=current_user, active=True, image=image)
-        f.save()
-        
-        return HttpResponseRedirect(reverse("index"))
+            title = title.strip()
+            # Saves the information of the auction into models object
+            f = Auction(title=title, price=int(price), description=description, lister=current_user, active=True, image=image)
+            f.save()
+            
+            return HttpResponseRedirect(reverse("index"))
 
     else:
         return render(request, "auctions/create.html", {
-                "Auction": Auction(),
-                "category": Auction().get_choices()
+                "CreateForm": CreateForm()
             })
 
 @login_required(redirect_field_name='/login')
@@ -205,35 +198,7 @@ def placebid(request, auctionid):
     get_time_remaining = lambda a : auction.time_created + auction.duration - a 
     time_remaining = get_time_remaining(datetime.now(timezone.utc))
 
-    if timedelta(time_remaining) < timedelta(days=0, seconds=0):
-        auction.active = False
-        auction.save()
-        message= "This listing has elapsed. Please try earlier next time."
-
-        # Gets if the item is being watched
-        user_watching = request.user.watchlist.get()
-        watched = False
-        if auction in user_watching.item.all():
-            watched = True
-
-        if Comment.objects.filter(post=auctionid):
-            comments = Comment.objects.filter(post=auctionid).all()
-        else: 
-            comments = False 
-
-
-        return render(request, 'auctions/item.html', {
-                "message": message,
-                "auction": auction,
-                "form": CommentForm(),
-                "comments": comments,
-                "bid": current_bid,
-                "bidForm": BidForm(),
-                "watched": watched,
-        })
-
-        
-
+    
     if Bid.objects.filter(post=auctionid):
         all_bids = Bid.objects.filter(post=auctionid).all()
                 
@@ -248,14 +213,62 @@ def placebid(request, auctionid):
 
     # When the bid form is being submitted
     if bid_form.is_valid():
-        bidder = request.user
+        bidder = request.user   
         bid_price = bid_form.cleaned_data['bid_price']
 
-        if bid_price > decimal.Decimal(current_price):
+        if bidder == auction.lister:
+            message = "You are the creator of this listing, therefore, you cannot bid on this item."
+
+            # Gets if the item is being watched
+            user_watching = request.user.watchlist.get()
+            watched = False
+            comments = False
+            if auction in user_watching.item.all():
+                watched = True
+
+            if Comment.objects.filter(post=auctionid):
+                comments = Comment.objects.filter(post=auctionid).all()
+
+            return render(request, 'auctions/item.html', {
+                    "message": message,
+                    "auction": auction,
+                    "form": CommentForm(),
+                    "comments": comments,
+                    "bid": current_bid,
+                    "bidForm": BidForm(),
+                    "watched": watched,
+            })
+
+        elif bid_price > decimal.Decimal(current_price):
             bid = Bid(bidder=bidder, bid_price=bid_price, post=auction)
             bid.save()
 
             return HttpResponseRedirect(reverse('item', args=[auctionid]))
+
+        elif time_remaining < timedelta(0, 0):
+            auction.active = False
+            auction.save()
+            message= "This listing has elapsed. Please try earlier next time."
+
+            # Gets if the item is being watched
+            user_watching = request.user.watchlist.get()
+            watched = False
+            comments = False
+            if auction in user_watching.item.all():
+                watched = True
+
+            if Comment.objects.filter(post=auctionid):
+                comments = Comment.objects.filter(post=auctionid).all()
+
+            return render(request, 'auctions/item.html', {
+                    "message": message,
+                    "auction": auction,
+                    "form": CommentForm(),
+                    "comments": comments,
+                    "bid": current_bid,
+                    "bidForm": BidForm(),
+                    "watched": watched,
+            })
 
         else:
             message= "Please bid higher than the current highest bid, please re-enter your bid."
